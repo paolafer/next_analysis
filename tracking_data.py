@@ -85,54 +85,20 @@ blob_radius = float(sys.argv[5])
 vox_size = np.array([size,size,size],dtype=np.float16)    # voxel size
 pe2keV = 1.
 
-event = []
-track_ID = []
-
-raw_evt_energy = []
-lost_raw_evt_energy = []
-minX = []
-maxX = []
-minY = []
-maxY = []
-minZ = []
-maxZ = []
-evt_energy = []
-
-energy = []
-length = []
-numb_of_hits = []
-numb_of_voxels = []
-numb_of_tracks = []
-v_size_x = []
-v_size_y = []
-v_size_z = []
-extreme1_x = []
-extreme1_y = []
-extreme1_z = []
-extreme2_x = []
-extreme2_y = []
-extreme2_z = []
-eblob1 = []
-eblob2 = []
-# eblob1_vxl = []
-# eblob2_vxl = []
-eblob1_bary = []
-eblob2_bary = []
-blob1_bary_x = []
-blob1_bary_y = []
-blob1_bary_z = []
-blob2_bary_x = []
-blob2_bary_y = []
-blob2_bary_z = []
-
-#centre_dist1 = []
-#centre_dist2 = []
-
-event_vxls = []
-track_ID_vxls = []
-voxel_x = []
-voxel_y = []
-voxel_z = []
+event, track_ID = [], []
+raw_evt_energy, lost_raw_evt_energy = [], []
+minX, maxX, minY, maxY, minZ, maxZ = [], [], [], [], [], []
+evt_energy, energy = [], []
+length, numb_of_hits, numb_of_voxels, numb_of_tracks = [], [], [], []
+v_size_x, v_size_y, v_size_z = [], [], []
+extreme1_x, extreme1_y, extreme1_z = [], [], []
+extreme2_x, extreme2_y, extreme2_z = [], [], []
+eblob1, eblob2 = [], []
+eblob1_bary, blob2_bary = [], []
+blob1_bary_x, blob1_bary_y, blob1_bary_z = [], [], []
+blob2_bary_x, blob2_bary_y, blob2_bary_z = [], [], []
+event_vxls, track_ID_vxls = [], []
+voxel_x, voxel_y, voxel_z = [], [], []
 voxel_e = []
 
 
@@ -149,9 +115,6 @@ for n in range(start,start+numb):
         nstring = n
 
     hits_file = '/home/paolafer/data/r{0}/hits/qthr3_qlm35_rebin2_nsipm6/hits_{0}_trigger2_v0.9.9_20180921_krth1300.{1}.h5'.format(run_number, nstring)
-#    hits_file = '/home/paolafer/ic_dev/data/r{0}/qthr3_qlm35_rebin2_nsipm6/hits/hits_{0}_v0.9.7-19-g574c657_20180710_krth1300.{1}.h5'.format(run_number, nstring)
-#    hits_file = '/Users/paola/Software/ic_data/run{0}/hits/hits_{0}_v0.9.7-19-g574c657_20180710_krth1300.{1}.h5'.format(run_number, nstring)
-
 
     if not os.path.isfile(hits_file):
         print('{0} not existing'.format(hits_file))
