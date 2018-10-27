@@ -20,6 +20,11 @@ cmap = plt.cm.get_cmap('jet')
 
 the_file = sys.argv[1]
 evt_number = int(sys.argv[2])
+mc = int(sys.argv[3])
+
+drift_velocity = 0.920869862957205
+if mc:
+    drift_velocity = 1
 
 with tb.open_file(the_file) as h5in:
     table = getattr(getattr(h5in.root, 'RECO'), 'Events').read()
@@ -33,7 +38,7 @@ with tb.open_file(the_file) as h5in:
     es = this_evt_df[this_evt_df.Q >= 0].E
 
     for x, y, z, e in zip(xs, ys, zs, es):
-        h = Hit(0, Cluster(0, xy(x,y), xy(0,0), 0), z, e, xy(0,0))
+        h = Hit(0, Cluster(0, xy(x,y), xy(0,0), 0), z*drift_velocity, e, xy(0,0))
         the_hits.append(h)
 
 voxels = voxelize_hits(the_hits, np.array([10., 10., 10]), False)

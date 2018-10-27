@@ -17,7 +17,12 @@ from invisible_cities.io.mcinfo_io import read_mcinfo
 hit_file = sys.argv[1]
 blob_file = sys.argv[2]
 evt_number = int(sys.argv[3])
-radius = int(sys.argv[4])
+mc = int(sys.argv[4])
+radius = int(sys.argv[5])
+
+drift_velocity = 0.920869862957205
+if mc:
+    drift_velocity = 1
 
 with tb.open_file(hit_file) as h5in:
     table = getattr(getattr(h5in.root, 'RECO'), 'Events').read()
@@ -27,8 +32,10 @@ with tb.open_file(hit_file) as h5in:
 ## exclude NN hits from plot
     x = this_evt_df[this_evt_df.Q >= 0].X
     y = this_evt_df[this_evt_df.Q >= 0].Y
-    z = this_evt_df[this_evt_df.Q >= 0].Z
+    t = this_evt_df[this_evt_df.Q >= 0].Z
     e = this_evt_df[this_evt_df.Q >= 0].E
+
+    z = [time*drift_velocity for time in t]
 
     blobs_df = pd.read_hdf(blob_file, 'tracks')
     blob_onet = blobs_df[blobs_df.numb_of_tracks == 1]
@@ -54,10 +61,10 @@ with tb.open_file(hit_file) as h5in:
     #ax.set_xlim([60, 150])
     #ax.set_ylim([-50, 130])
     #ax.set_zlim([140, 220])
-    max_range = np.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max()/2.0
-    mid_x = (x.max()+x.min()) * 0.5
-    mid_y = (y.max()+y.min()) * 0.5
-    mid_z = (z.max()+z.min()) * 0.5
+    max_range = np.array([xa.max()-xa.min(), ya.max()-ya.min(), za.max()-za.min()]).max()/2.0
+    mid_x = (xa.max()+xa.min()) * 0.5
+    mid_y = (ya.max()+ya.min()) * 0.5
+    mid_z = (za.max()+za.min()) * 0.5
     ax.set_xlim(mid_x - max_range, mid_x + max_range)
     ax.set_ylim(mid_y - max_range, mid_y + max_range)
     ax.set_zlim(mid_z - max_range, mid_z + max_range)

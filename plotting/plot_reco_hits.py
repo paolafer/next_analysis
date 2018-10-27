@@ -16,6 +16,11 @@ from invisible_cities.io.mcinfo_io import read_mcinfo
 
 the_file = sys.argv[1]
 evt_number = int(sys.argv[2])
+mc = int(sys.argv[3])
+
+drift_velocity = 0.920869862957205
+if mc:
+    drift_velocity = 1
 
 with tb.open_file(the_file) as h5in:
     table = getattr(getattr(h5in.root, 'RECO'), 'Events').read()
@@ -26,8 +31,10 @@ with tb.open_file(the_file) as h5in:
     ## exclude NN hits from plot
     x = this_evt_df[this_evt_df.Q >= 0].X
     y = this_evt_df[this_evt_df.Q >= 0].Y
-    z = this_evt_df[this_evt_df.Q >= 0].Z
+    t = this_evt_df[this_evt_df.Q >= 0].Z
     e = this_evt_df[this_evt_df.Q >= 0].E
+
+    z = [time*drift_velocity for time in t]
 
     xa = np.array(x)
     ya = np.array(y)
