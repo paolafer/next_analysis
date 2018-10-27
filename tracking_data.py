@@ -48,7 +48,6 @@ def merge_NN_hits(hits_all, hits_nonNN, lost_energy):
                             h_add.append(h2)
                         elif zdist == zdist_min:
                             h_add.append(h2)
-                distances.append(zdist_min)
 
                 # Add the energy.
                 if zdist_min > 0:
@@ -85,6 +84,7 @@ blob_radius = float(sys.argv[5])
 vox_size = np.array([size,size,size],dtype=np.float16)    # voxel size
 pe2keV = 1.
 
+loop_events, not_fid_events = [], []
 event, track_ID = [], []
 raw_evt_energy, lost_raw_evt_energy = [], []
 minX, maxX, minY, maxY, minZ, maxZ = [], [], [], [], [], []
@@ -94,7 +94,7 @@ v_size_x, v_size_y, v_size_z = [], [], []
 extreme1_x, extreme1_y, extreme1_z = [], [], []
 extreme2_x, extreme2_y, extreme2_z = [], [], []
 eblob1, eblob2 = [], []
-eblob1_bary, blob2_bary = [], []
+eblob1_bary, eblob2_bary = [], []
 blob1_bary_x, blob1_bary_y, blob1_bary_z = [], [], []
 blob2_bary_x, blob2_bary_y, blob2_bary_z = [], [], []
 event_vxls, track_ID_vxls = [], []
@@ -103,6 +103,8 @@ voxel_e = []
 
 
 hits_file = ''
+events_in = 0
+not_fid = 0
 for n in range(start,start+numb):
     nstring = ''
     if n < 10:
@@ -151,9 +153,12 @@ for n in range(start,start+numb):
         bad_event[ee] = bad_evt
 
 
+    events_in += len(hits_evt)
     for nevt, hitc in hits_evt.items():
 
-        if bad_event[nevt]: continue
+        if bad_event[nevt]:
+            not_fid += 1
+            continue
 
         vmaxX = 0.
         vminX = 1e+06
@@ -290,6 +295,9 @@ for n in range(start,start+numb):
                 voxel_z += [v.Z]
                 voxel_e += [v.E]
 
+loop_events = [events_in]
+not_fid_events = [not_fid]
+blob_radius = [blob_radius]
 
 df = pd.DataFrame({'event': event, 'raw_evt_energy': raw_evt_energy, 'lost_raw_evt_energy': lost_raw_evt_energy,
                     'evt_energy': evt_energy, 'energy': energy,
@@ -309,10 +317,15 @@ df_vxls = pd.DataFrame({'event': event_vxls, 'track_ID': track_ID_vxls,
                         'voxel_x': voxel_x, 'voxel_y': voxel_y, 'voxel_z': voxel_z, 'voxel_e': voxel_e
                         })
 
-out_name = '/home/paolafer/analysis/10bar/tracking/qthr3_qlm35_rebin2_nsipm6/tracking_voxels_and_tracks_r{0}_vxl{1}mm_R{2}mm_{3}_{4}.hdf5'.format(run_number, size, blob_radius, start, numb)
+df_run_info = pd.DataFrame({'events_in': loop_events, 'not_fid': not_fid_events,
+                            'blob_radius': blob_radius
+                           })
+
+out_name = '/home/paolafer/analysis/10bar/tracking/qthr3_qlm35_rebin2_nsipm6/tracking_mod_corona_r{0}_vxl{1}mm_R{2}mm_{3}_{4}.hdf5'.format(run_number, size, blob_radius, start, numb)
 store = pd.HDFStore(out_name, "w", complib=str("zlib"), complevel=4)
 store.put('tracks', df, format='table', data_columns=True)
 store.put('voxels', df_vxls, format='table', data_columns=True)
+store.put('run_info', df_run_info, format='table', data_columns=True)
 store.close()
 
 
