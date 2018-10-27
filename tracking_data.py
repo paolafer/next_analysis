@@ -321,7 +321,7 @@ df_run_info = pd.DataFrame({'events_in': loop_events, 'not_fid': not_fid_events,
                             'blob_radius': blob_radius
                            })
 
-out_name = '/home/paolafer/analysis/10bar/tracking/qthr3_qlm35_rebin2_nsipm6/tracking_mod_corona_r{0}_vxl{1}mm_R{2}mm_{3}_{4}.hdf5'.format(run_number, size, blob_radius, start, numb)
+out_name = '/home/paolafer/analysis/10bar/tracking/qthr3_qlm35_rebin2_nsipm6/tracking_mod_corona_r{0}_vxl{1}mm_R{2}mm_{3}_{4}.hdf5'.format(run_number, size, blob_radius[0], start, numb)
 store = pd.HDFStore(out_name, "w", complib=str("zlib"), complevel=4)
 store.put('tracks', df, format='table', data_columns=True)
 store.put('voxels', df_vxls, format='table', data_columns=True)
