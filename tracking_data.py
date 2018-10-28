@@ -87,7 +87,7 @@ pe2keV = 1.
 loop_events, not_fid_events = [], []
 event, track_ID = [], []
 raw_evt_energy, lost_raw_evt_energy = [], []
-minX, maxX, minY, maxY, minZ, maxZ = [], [], [], [], [], []
+minX, maxX, minY, maxY, minZ, maxZ, maxR = [], [], [], [], [], [], []
 evt_energy, energy = [], []
 length, numb_of_hits, numb_of_voxels, numb_of_tracks = [], [], [], []
 v_size_x, v_size_y, v_size_z = [], [], []
@@ -164,8 +164,9 @@ for n in range(start,start+numb):
         vminX = 1e+06
         vmaxY = -1e+06
         vminY = 1e+06
-        vmaxZ = -1e+06
+        vmaxZ = 0
         vminZ = 1e+06
+        vmaxR = 0
         for hh in hitc:
             if hh.X > vmaxX:
                 vmaxX = hh.X
@@ -179,6 +180,8 @@ for n in range(start,start+numb):
                 vmaxZ = hh.Z
             if hh.Z < vminZ:
                 vminZ = hh.Z
+            if np.sqrt(hh.X*hh.X+hh.Y*hh.Y) > vmaxR:
+                vmaxR = np.sqrt(hh.X*hh.X+hh.Y*hh.Y)
 
         tot_e = sum([hh.E for hh in hitc])
 
@@ -257,6 +260,7 @@ for n in range(start,start+numb):
             maxY += [vmaxY]
             minZ += [vminZ]
             maxZ += [vmaxZ]
+            maxR += [vmaxR]
             evt_energy += [tot_e/pe2keV]
             numb_of_hits += [len(hitc)]
             v_size_x += [voxels[0].size[0]]
@@ -301,7 +305,7 @@ blob_radius = [blob_radius]
 
 df = pd.DataFrame({'event': event, 'raw_evt_energy': raw_evt_energy, 'lost_raw_evt_energy': lost_raw_evt_energy,
                     'evt_energy': evt_energy, 'energy': energy,
-                    'minX': minX, 'maxX': maxX, 'minY': minY, 'maxY': maxY, 'minZ': minZ, 'maxZ': maxZ,
+                    'minX': minX, 'maxX': maxX, 'minY': minY, 'maxY': maxY, 'minZ': minZ, 'maxZ': maxZ, 'maxR': maxR,
                     'numb_of_hits': numb_of_hits, 'length': length, 'track_ID': track_ID,
                     'numb_of_tracks': numb_of_tracks,
                     'numb_of_voxels': numb_of_voxels,
