@@ -160,11 +160,11 @@ for n in range(start,start+numb):
             not_fid += 1
             continue
 
-        vmaxX = 0.
+        vmaxX = -1e+06
         vminX = 1e+06
-        vmaxY = 0.
+        vmaxY = -1e+06
         vminY = 1e+06
-        vmaxZ = 0.
+        vmaxZ = -1e+06
         vminZ = 1e+06
         for hh in hitc:
             if hh.X > vmaxX:
