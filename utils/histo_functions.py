@@ -33,9 +33,9 @@ for i in range(len(tableau20)):
     r, g, b = tableau20[i]
     tableau20[i] = (r / 255., g / 255., b / 255.)
 
-blue = tableau20[0]
-green = tableau20[4]
-fucsia = tableau20[6]
+#blue = tableau20[0]
+#green = tableau20[4]
+#fucsia = tableau20[6]
 
 
 # useful to normalize histograms
@@ -43,7 +43,7 @@ def get_weights(data):
     return np.repeat(1.0/len(data), len(data))
 
 
-def plot_comparison(data_one, data_two, nbins, color_one=fucsia, color_two=blue, xlabel='', ylabel='', legend_loc=1):
+def plot_comparison(data_one, data_two, nbins, color_one, color_two, xlabel='', ylabel='', legend_loc=1):
 
     bins = np.histogram(np.hstack((data_two, data_one)),
                         bins=nbins)[1] #get the bin edges
