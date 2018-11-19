@@ -3,7 +3,7 @@ Set of functions used in the topology analysis
 """
 
 import numpy as np
-from .. histo_functions import exp, gauss
+from . histo_functions import exp, gauss
 
 ### Errors from the fit, bin by bin
 
