@@ -105,6 +105,7 @@ blob2_bary_x, blob2_bary_y, blob2_bary_z = [], [], []
 event_vxls, track_ID_vxls = [], []
 voxel_x, voxel_y, voxel_z = [], [], []
 voxel_e = []
+energy_corr, eblob1_corr_bary, eblob2_corr_bary = [], [], []
 
 
 hits_file = ''
@@ -166,7 +167,6 @@ for n in range(start,start+numb):
         tot_e = sum([hh.E for hh in hitc])
         voxels = plf.voxelize_hits(hitc, vox_size)
         trks = plf.make_track_graphs(voxels)
-        original_n_tracks = len(trks)
 
         while True:
             modified_voxels = 0
@@ -185,12 +185,10 @@ for n in range(start,start+numb):
                     ### remove voxel from list of voxels
                     voxels.remove(extr1)
                     ### remove hits from the list of hits
-                    extr_hits = []
-                    for h in hitc:
-                        within1 = abs(h.pos - extr1.pos)
-                        if np.all(within1 <= vxl_size/2.):
-                            extr_hits.append(h)
-                    for h in extr_hits:
+                    pos1 = [h.pos for h in extr1.hits]
+                    qs1 = [h.E for h in extr1.hits]
+                    bary_extr1_pos = np.average(pos1, weights=qs1, axis=0)
+                    for h in extr1.hits:
                         hitc.remove(h)
 
                     ### find hit with minimum distance, only among neighbours
@@ -200,9 +198,8 @@ for n in range(start,start+numb):
                     for hh in hitc:
                         for v in voxels:
                             if neighbours(extr1, v):
-                                within = abs(hh.pos - v.pos)
-                                if np.all(within <= vxl_size/2.):
-                                    dist = np.linalg.norm(extr1.pos - hh.pos)
+                                for hh in v.hits:
+                                    dist = np.linalg.norm(bary_extr1_pos - hh.pos)
                                     if dist < min_dist:
                                         min_dist = dist
                                         min_hit = hh
@@ -220,12 +217,10 @@ for n in range(start,start+numb):
                     ### remove voxel from list of voxels
                     voxels.remove(extr2)
                     ### remove hits from the list of hits
-                    extr_hits = []
-                    for h in hitc:
-                        within2 = abs(h.pos - extr2.pos)
-                        if np.all(within2 <= vxl_size/2.):
-                            extr_hits.append(h)
-                    for h in extr_hits:
+                    pos2 = [h.pos for h in extr2.hits]
+                    qs2 = [h.E for h in extr2.hits]
+                    bary_extr2_pos = np.average(pos2, weights=qs2, axis=0)
+                    for h in extr2.hits:
                         hitc.remove(h)
 
                     ### find hit with minimum distance, only among neighbours
@@ -235,9 +230,8 @@ for n in range(start,start+numb):
                     for hh in hitc:
                         for v in voxels:
                             if neighbours(extr2, v):
-                                within = abs(hh.pos - v.pos)
-                                if np.all(within <= vxl_size/2.):
-                                    dist = np.linalg.norm(extr2.pos - hh.pos)
+                                for hh in v.hits:
+                                    dist = np.linalg.norm(bary_extr2_pos - hh.pos)
                                     if dist < min_dist:
                                         min_dist = dist
                                         min_hit = hh
@@ -253,31 +247,6 @@ for n in range(start,start+numb):
 
         ### Make voxels with the new list of hits
         trks = plf.make_track_graphs(voxels)
-
-        vmaxX = -1e+06
-        vminX = 1e+06
-        vmaxY = -1e+06
-        vminY = 1e+06
-        vmaxZ = 0.
-        vminZ = 1e+06
-        vmaxR = 0
-        for hh in hitc:
-            if hh.X > vmaxX:
-                vmaxX = hh.X
-            if hh.X < vminX:
-                vminX = hh.X
-            if hh.Y > vmaxY:
-                vmaxY = hh.Y
-            if hh.Y < vminY:
-                vminY = hh.Y
-            if hh.Z > vmaxZ:
-                vmaxZ = hh.Z
-            if hh.Z < vminZ:
-                vminZ = hh.Z
-            if np.sqrt(hh.X*hh.X + hh.Y*hh.Y) > vmaxR:
-                vmaxR = np.sqrt(hh.X*hh.X + hh.Y*hh.Y)
-
-
         tot_e = sum([hh.E for hh in hitc])
 
         for c, t in enumerate(trks, 0):
@@ -299,33 +268,19 @@ for n in range(start,start+numb):
                 e_blob1, e_blob2 = e_blob2, e_blob1
 
             ## second way to calculate blob (à la Michel)
-            vxl_size = extr1.size
-            extr1_hits = []
-            extr2_hits = []
-            for h in hitc:
-                within1 = abs(h.pos - extr1.pos)
-                within2 = abs(h.pos - extr2.pos)
-                if np.all(within1 <= vxl_size/2.):
-                    extr1_hits.append(h)
-                if np.all(within2 <= vxl_size/2.):
-                    extr2_hits.append(h)
-
-            positions1 = [h.pos for h in extr1_hits]
-            qs1 = [h.E for h in extr1_hits]
+            positions1 = [h.pos for h in extr1.hits]
+            qs1 = [h.E for h in extr1.hits]
             if sum(qs1):
                 bary_pos1 = np.average(positions1, weights=qs1, axis=0)
             else:
                 bary_pos1 = extr1.pos
 
-            positions2 = [h.pos for h in extr2_hits]
-            qs2 = [h.E for h in extr2_hits]
+            positions2 = [h.pos for h in extr2.hits]
+            qs2 = [h.E for h in extr2.hits]
             if sum(qs2):
                 bary_pos2 = np.average(positions2, weights=qs2, axis=0)
             else:
                 bary_pos2 = extr2.pos
-
-            diff1 = np.linalg.norm(bary_pos1 - extr1.pos)
-            diff2 = np.linalg.norm(bary_pos2 - extr2.pos)
 
             e_blob1_bary = e_blob2_bary = 0.
             for h in hitc:
@@ -339,53 +294,147 @@ for n in range(start,start+numb):
             if (e_blob2_bary > e_blob1_bary):
                 e_blob1_bary, e_blob2_bary = e_blob2_bary, e_blob1_bary
 
+
+            ### Save quantities before E correction
+            raw_evt_energy += [raw_energy[nevt]]
+            lost_raw_evt_energy += [lost_energy[nevt]]
+            evt_energy += [tot_e/pe2keV]
+            energy += [etrk/pe2keV]
+
+            eblob1 += [e_blob1/pe2keV]
+            eblob2 += [e_blob2/pe2keV]
+            eblob1_bary += [e_blob1_bary/pe2keV]
+            eblob2_bary += [e_blob2_bary/pe2keV]
+
+            min_x = 1e+06
+            max_x = -1e+06
+            min_y = 1e+06
+            max_y = -1e+06
+            min_z = 1e+06
+            max_z = 0.
+            max_r = 0
+            for v in t.nodes():
+                for h in v.hits:
+                    if h.X < min_x:
+                        min_x = h.X
+                    if h.X > max_x:
+                        max_x = h.X
+                    if h.Y < min_y:
+                        min_y = h.Y
+                    if h.Y > max_y:
+                        max_y = h.Y
+                    if h.Z < min_z:
+                        min_z = h.Z
+                    if h.Z > max_z:
+                        max_z = h.Z
+                    if np.sqrt(h.X*h.X + h.Y*h.Y) > max_r:
+                        max_r = np.sqrt(h.X*h.X + h.Y*h.Y)
+
+            z_factor = 1 - 1.8e-04 * (max_z - min_z)
+
+            for v in t.nodes():
+                for h in v.hits:
+                    h.energy = h.energy/z_factor
+                v.energy = v.energy/z_factor
+
+        ### we need to create tracks again, because of networkx algorithms
+        trks = plf.make_track_graphs(voxels)
+
+        for c, t in enumerate(trks, 0):
+            etrk_corr = sum([vox.E for vox in t.nodes()])
+            extr1, extr2 = plf.find_extrema(t)
+
+            ### method 1
+            e_blob1_corr = e_blob2_corr = 0.
+            for v in t.nodes():
+                for h in v.hits:
+                    dist1 = np.linalg.norm(h.pos - extr1.pos)
+                    dist2 = np.linalg.norm(h.pos - extr2.pos)
+                    if dist1 < blob_radius:
+                        e_blob1_corr += h.E
+                    if dist2 < blob_radius:
+                        e_blob2_corr += h.E
+
+            if (e_blob2_corr > e_blob1_corr):
+                e_blob1_corr, e_blob2_corr = e_blob2_corr, e_blob1_corr
+
+            ### method 2
+            positions1 = [h.pos for h in extr1.hits]
+            qs1 = [h.E for h in extr1.hits]
+            if sum(qs1):
+                bary_pos1 = np.average(positions1, weights=qs1, axis=0)
+            else:
+                bary_pos1 = extr1.pos
+
+            positions2 = [h.pos for h in extr2.hits]
+            qs2 = [h.E for h in extr2.hits]
+            if sum(qs2):
+                bary_pos2 = np.average(positions2, weights=qs2, axis=0)
+            else:
+                bary_pos2 = extr2.pos
+
+            e_blob1_corr_bary = e_blob2_corr_bary = 0.
+            for v in t.nodes():
+                for h in v.hits:
+                    dist1 = np.linalg.norm(h.pos - bary_pos1)
+                    dist2 = np.linalg.norm(h.pos - bary_pos2)
+                    if dist1 < blob_radius:
+                        e_blob1_corr_bary += h.E
+                    if dist2 < blob_radius:
+                        e_blob2_corr_bary += h.E
+
+            if (e_blob2_corr_bary > e_blob1_corr_bary):
+                e_blob1_corr_bary, e_blob2_corr_bary = e_blob2_corr_bary, e_blob1_corr_bary  
+
+
             ## event-related
-            event = event + [nevt]
-            raw_evt_energy = raw_evt_energy + [raw_energy[nevt]]
-            lost_raw_evt_energy = lost_raw_evt_energy + [lost_energy[nevt]]
-            minX = minX + [vminX]
-            maxX = maxX + [vmaxX]
-            minY = minY + [vminY]
-            maxY = maxY + [vmaxY]
-            minZ = minZ + [vminZ]
-            maxZ = maxZ + [vmaxZ]
-            evt_energy = evt_energy +[tot_e/pe2keV]
-            numb_of_hits = numb_of_hits + [len(hitc)]
-            v_size_x = v_size_x + [voxels[0].size[0]]
-            v_size_y = v_size_y + [voxels[0].size[1]]
-            v_size_z = v_size_z + [voxels[0].size[2]]
+            event += [nevt]
+            numb_of_hits += [len(hitc)]
+            v_size_x += [voxels[0].size[0]]
+            v_size_y += [voxels[0].size[1]]
+            v_size_z += [voxels[0].size[2]]
 
             ## track-related
-            track_ID = track_ID + [c]
-            length = length + [plf.length(t)]
-            energy = energy + [etrk/pe2keV]
-            numb_of_voxels = numb_of_voxels + [len(t.nodes())]
-            numb_of_tracks = numb_of_tracks + [len(trks)]
-            extreme1_x = extreme1_x +  [extr1.X]
-            extreme1_y = extreme1_y +  [extr1.Y]
-            extreme1_z = extreme1_z +  [extr1.Z]
-            extreme2_x = extreme2_x +  [extr2.X]
-            extreme2_y = extreme2_y +  [extr2.Y]
-            extreme2_z = extreme2_z +  [extr2.Z]
-            eblob1 = eblob1 + [e_blob1/pe2keV]
-            eblob2 = eblob2 + [e_blob2/pe2keV]
-            eblob1_bary = eblob1_bary + [e_blob1_bary/pe2keV]
-            eblob2_bary = eblob2_bary + [e_blob2_bary/pe2keV]
-            blob1_bary_x = blob1_bary_x + [bary_pos1[0]]
-            blob1_bary_y = blob1_bary_y + [bary_pos1[1]]
-            blob1_bary_z = blob1_bary_z + [bary_pos1[2]]
-            blob2_bary_x = blob2_bary_x + [bary_pos2[0]]
-            blob2_bary_y = blob2_bary_y + [bary_pos2[1]]
-            blob2_bary_z = blob2_bary_z + [bary_pos2[2]]
+            track_ID += [c]
+            length += [plf.length(t)]
+            numb_of_voxels += [len(t.nodes())]
+            numb_of_tracks += [len(trks)]
+            extreme1_x += [extr1.X]
+            extreme1_y += [extr1.Y]
+            extreme1_z += [extr1.Z]
+            extreme2_x += [extr2.X]
+            extreme2_y += [extr2.Y]
+            extreme2_z += [extr2.Z]
+
+            blob1_bary_x += [bary_pos1[0]]
+            blob1_bary_y += [bary_pos1[1]]
+            blob1_bary_z += [bary_pos1[2]]
+            blob2_bary_x += [bary_pos2[0]]
+            blob2_bary_y += [bary_pos2[1]]
+            blob2_bary_z += [bary_pos2[2]]
+
+            energy_corr += [etrk_corr/pe2keV]
+            eblob1_corr += [e_blob1_corr/pe2keV]
+            eblob2_corr += [e_blob2_corr/pe2keV]
+            eblob1_corr_bary += [e_blob1_corr_bary/pe2keV]
+            eblob2_corr_bary += [e_blob2_corr_bary/pe2keV]
+
+            minX += [min_x]
+            maxX += [max_x]
+            minY += [min_y]
+            maxY += [max_y]
+            minZ += [min_z]
+            maxZ += [max_z]
+            maxR += [max_r]
 
             for v in t.nodes():
                 ## voxel-related
-                event_vxls = event_vxls + [nevt]
-                track_ID_vxls = track_ID_vxls + [c]
-                voxel_x = voxel_x + [v.X]
-                voxel_y = voxel_y + [v.Y]
-                voxel_z = voxel_z + [v.Z]
-                voxel_e = voxel_e + [v.E]
+                event_vxls += [nevt]
+                track_ID_vxls += [c]
+                voxel_x += [v.X]
+                voxel_y += [v.Y]
+                voxel_z += [v.Z]
+                voxel_e += [v.E]
 
 loop_events = [events_in]
 not_fid_events = [not_fid]
