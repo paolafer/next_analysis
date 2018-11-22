@@ -50,9 +50,10 @@ def find_fractions(x, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbins_pl
         var_s += var_on_signal_events(fit_result, centre_value)
         var_b += var_on_background_events(fit_result, centre_value)
 
+    tot = s+b
     fs = s/(s+b)
     fb = b/(s+b)
     err_fs = np.sqrt((b/(s+b)**2)**2*var_s + (s/(s+b)**2)**2*var_b)
     err_fb = np.sqrt((s/(s+b)**2)**2*var_b + (b/(s+b)**2)**2*var_s)
 
-    return(fs, fb, err_fs, err_fb)
+    return(tot, fs, fb, err_fs, err_fb)

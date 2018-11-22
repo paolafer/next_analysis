@@ -199,7 +199,7 @@ for n in range(start,start+numb):
 loop_events = [events_in]
 blob_radius = [blob_radius]
 
-df = pd.DataFrame({ 'event': event, 'evt_energy': evt_energy,
+df = pd.DataFrame({ 'event': event, 'evt_energy': evt_energy, 'signal': signal,
                     'minX': minX, 'maxX': maxX, 'minY': minY, 'maxY': maxY, 'minZ': minZ, 'maxZ': maxZ,
                     'maxR': maxR,
                     'numb_of_hits': numb_of_hits, 'energy': energy,
