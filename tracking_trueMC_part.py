@@ -60,6 +60,14 @@ for n in range(start,start+numb):
 
             tot_e = sum([hh.E for hh in hitc])
 
+            ### smear hit energy to create 1% FWHM resolution at 1592 keV
+            sigma_e = 0.01/2.35 * np.sqrt(1.592/tot_e) ### remember, this is relative!
+            smeared_tot_e = tot_e + tot_e*np.random.normal(0., 1.) * sigma_e
+            sm_factor = smeared_tot_e / tot_e
+            #print(tot_e, smeared_tot_e)
+            for h in hitc:
+                h.energy = h.energy * sm_factor
+
             voxels = plf.voxelize_hits(hitc, vox_size)
             trks = plf.make_track_graphs(voxels)
 
@@ -212,7 +220,7 @@ df_vxls = pd.DataFrame({'event': event_vxls, 'track_ID': track_ID_vxls,
 df_run_info = pd.DataFrame({'events_in': loop_events, 'blob_radius': blob_radius
                            })
 
-out_name = '/home/paolafer/analysis/tracking_true2mm_TlMC_run4_vxl{0}mm_R{1}mm_{2}_{3}.hdf5'.format(int(size), int(blob_radius[0]), start, numb)
+out_name = '/home/paolafer/analysis/tracking_trueinfo_TlMC_run4_vxl{0}mm_R{1}mm_{2}_{3}.hdf5'.format(int(size), int(blob_radius[0]), start, numb)
 
 store = pd.HDFStore(out_name, "w", complib=str("zlib"), complevel=4)
 store.put('tracks', df, format='table', data_columns=True)
