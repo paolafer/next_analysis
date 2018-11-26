@@ -86,8 +86,7 @@ blob_radius = float(sys.argv[5])
 
 vox_size = np.array([size,size,size],dtype=np.float16)    # voxel size
 pe2keV = 1.
-#voxel_cut = 4694.89 # default corona, corresponds to 15 keV
-voxel_cut = 3130 # modified corona, correspond to 10 keV
+voxel = 6259.85 # corresponds to 20 keV
 
 loop_events, not_fid_events = [], []
 event, track_ID = [], []
