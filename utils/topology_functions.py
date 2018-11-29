@@ -83,4 +83,4 @@ def find_fractions_2(x, y, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbi
     err_fs = np.sqrt(1/n_tot**2*var_s)
     err_fb = np.sqrt(1/n_tot**2*var_b)
 
-    return(tot, fs, fb, err_fs, err_fb)
+    return(n_tot, fs, fb, err_fs, err_fb)
