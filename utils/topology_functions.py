@@ -57,3 +57,30 @@ def find_fractions(x, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbins_pl
     err_fb = np.sqrt((s/(s+b)**2)**2*var_b + (b/(s+b)**2)**2*var_s)
 
     return(tot, fs, fb, err_fs, err_fb)
+
+
+def find_fractions_2(x, y, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbins_plot):
+    low_bin = np.digitize(e_min, x)
+    high_bin = np.digitize(e_max, x)
+
+    n_tot = sum(y[low_bin:high_bin+1])
+
+    bin_width = (e_max_plot - e_min_plot) / nbins_plot
+
+    s = b = 0.
+    var_s = var_b = 0
+    for i in range(low_bin, high_bin+1):
+        centre_value = e_min_plot + i * bin_width + bin_width/2
+        s += gauss(centre_value, fit_result.values[2], fit_result.values[3], fit_result.values[4])
+        b += exp(centre_value, fit_result.values[0], fit_result.values[1])
+
+        var_s += var_on_signal_events(fit_result, centre_value)
+        var_b += var_on_background_events(fit_result, centre_value)
+
+    #tot = s+b
+    fs = s/n_tot
+    fb = b/n_tot
+    err_fs = np.sqrt(1/n_tot**2*var_s)
+    err_fb = np.sqrt(1/n_tot**2*var_b)
+
+    return(tot, fs, fb, err_fs, err_fb)
