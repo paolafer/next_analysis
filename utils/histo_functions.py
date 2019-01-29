@@ -41,9 +41,9 @@ for i in range(len(tableau20)):
 # useful to normalize histograms
 def get_weights(data, norm):
     if norm:
-        return np.repeat(1.0, len(data))
-    else:
         return np.repeat(1.0/len(data), len(data))
+    else:
+        return np.repeat(1.0, len(data))
 
 
 def plot_comparison(data_one, data_two, nbins, norm, color_one, color_two, xlabel='', ylabel='', legend_loc=1):
