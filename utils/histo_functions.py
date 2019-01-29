@@ -39,16 +39,20 @@ for i in range(len(tableau20)):
 
 
 # useful to normalize histograms
-def get_weights(data):
-    return np.repeat(1.0/len(data), len(data))
+def get_weights(data, norm):
+    if norm:
+        return np.repeat(1.0, len(data))
+    else:
+        return np.repeat(1.0/len(data), len(data))
 
 
-def plot_comparison(data_one, data_two, nbins, color_one, color_two, xlabel='', ylabel='', legend_loc=1):
+def plot_comparison(data_one, data_two, nbins, norm, color_one, color_two, xlabel='', ylabel='', legend_loc=1):
 
     bins = np.histogram(np.hstack((data_two, data_one)),
                         bins=nbins)[1] #get the bin edges
-    weights_one = get_weights(data_one)
-    weights_two = get_weights(data_two)
+
+    weights_one = get_weights(data_one, norm)
+    weights_two = get_weights(data_two, norm)
 
     plt.hist(data_one, label='MC', weights=weights_one, color=color_one,
              bins=bins, histtype='step', stacked=True, fill=False, linewidth=4.0, linestyle=':')
