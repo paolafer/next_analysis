@@ -105,23 +105,15 @@ event_vxls, track_ID_vxls = [], []
 voxel_x, voxel_y, voxel_z = [], [], []
 voxel_e = []
 energy_corr, eblob1_corr_bary, eblob2_corr_bary = [], [], []
+time = []
 
 
 hits_file = ''
 events_in = 0
 not_fid = 0
 for n in range(start,start+numb):
-    nstring = ''
-    if n < 10:
-        nstring = '000{0}'.format(n)
-    elif n < 100:
-        nstring = '00{0}'.format(n)
-    elif n < 1000:
-        nstring = '0{0}'.format(n)
-    else:
-        nstring = n
 
-    hits_file = '/data_extra/paolafer/data/r{0}/hits/hits_mod_corona_{0}_trigger2_v0.9.9_20180921_krth1300.{1}.h5'.format(run_number, nstring)
+    hits_file = '/data_extra/paolafer/data/r{0}/hits/hits_{0}_trigger2_v0.9.9_20180921_krth1300.{1:04d}.h5'.format(run_number, n)
 
     if not os.path.isfile(hits_file):
         print('{0} not existing'.format(hits_file))
@@ -141,20 +133,26 @@ for n in range(start,start+numb):
     for ee, hc in good_hits.items():
         bad_evt = False
         hc_corr = []
-        raw_e = 0.
-        for hh in hc.hits:
-            raw_e += hh.E
-            if XYcorrection(hh.X, hh.Y).value == 0:
+
+        hX = [hh.X for hh in hc.hits]
+        hY = [hh.Y for hh in hc.hits]
+        hZ = [hh.Z for hh in hc.hits]
+        hE = [hh.E for hh in hc.hits]
+
+        hEcorr = hE * LTcorrection(hZ, hX, hY).value * XYcorrection(hX, hY).value
+
+        for h, ec in zip(hc.hits, hEcorr):
+            if ec == 0:
                 bad_evt = True
                 break
-            hecorr = hh.E * LTcorrection(hh.Z, hh.X, hh.Y).value * XYcorrection(hh.X, hh.Y).value
-# here we convert time to space for z. Remember that, so far, drift velocity has been assumed to be 1
-            z = hh.Z * drift_velocity
-            hcorr = Hit(0,Cluster(0, xy(hh.X,hh.Y), xy(0,0), 0), z, hecorr, xy(0,0))
+            hcorr = Hit(0, Cluster(0, xy(h.X,h.Y), xy(0,0), 0), h.Z*drift_velocity, ec, xy(h.Xpeak,h.Ypeak))
             hc_corr.append(hcorr)
+
+
         hits_evt[ee] = hc_corr
-        raw_energy[ee] = raw_e
         bad_event[ee] = bad_evt
+        times[ee] = hc.time
+        raw_energy[ee] = sum(hE)
 
     events_in += len(hits_evt)
     for nevt, hitc in hits_evt.items():
@@ -194,22 +192,17 @@ for n in range(start,start+numb):
                     min_dist = 1e+06
                     min_hit = hitc[0]
                     min_v = voxels[0]
-                    for hh in hitc:
-                        for v in voxels:
-                            if neighbours(extr1, v):
-                                for hh in v.hits:
-                                    dist = np.linalg.norm(bary_extr1_pos - hh.pos)
-                                    if dist < min_dist:
-                                        min_dist = dist
-                                        min_hit = hh
-                                        min_v = v
-                    ### add voxel energy to hit
-                    for hh in hitc:
-                        if hh == min_hit:
-                            hh.energy = hh.energy + extr1.E
                     for v in voxels:
-                        if v == min_v:
-                            v.energy += extr1.E
+                        if neighbours(extr1, v):
+                            for hh in v.hits:
+                                dist = np.linalg.norm(bary_extr1_pos - hh.pos)
+                                if dist < min_dist:
+                                    min_dist = dist
+                                    min_hit = hh
+                                    min_v = v
+                    ### add voxel energy to hit and voxel, separately
+                    min_hit.energy += extr1.E
+                    min_v.energy   += extr1.E
 
                 if extr2.E < voxel_cut:
                     modified_voxels += 1
@@ -226,22 +219,18 @@ for n in range(start,start+numb):
                     min_dist = 1e+06
                     min_hit = hitc[0]
                     min_v = voxels[0]
-                    for hh in hitc:
-                        for v in voxels:
-                            if neighbours(extr2, v):
-                                for hh in v.hits:
-                                    dist = np.linalg.norm(bary_extr2_pos - hh.pos)
-                                    if dist < min_dist:
-                                        min_dist = dist
-                                        min_hit = hh
-                                        min_v = v
-                    ### add voxel energy to hit
-                    for hh in hitc:
-                        if hh == min_hit:
-                            hh.energy = hh.energy + extr2.E
                     for v in voxels:
-                        if v == min_v:
-                            v.energy += extr2.E
+                        if neighbours(extr2, v):
+                            for hh in v.hits:
+                                dist = np.linalg.norm(bary_extr2_pos - hh.pos)
+                                if dist < min_dist:
+                                    min_dist = dist
+                                    min_hit = hh
+                                    min_v = v
+                    ### add voxel energy to hit and voxel, separately
+                    min_hit.energy += extr2.E
+                    min_v.energy   += extr2.E
+
             if modified_voxels == 0: break
 
         ### Make voxels with the new list of hits
@@ -305,31 +294,15 @@ for n in range(start,start+numb):
             eblob1_bary += [e_blob1_bary/pe2keV]
             eblob2_bary += [e_blob2_bary/pe2keV]
 
-            min_x = 1e+06
-            max_x = -1e+06
-            min_y = 1e+06
-            max_y = -1e+06
-            min_z = 1e+06
-            max_z = 0.
-            max_r = 0
-            for v in t.nodes():
-                for h in v.hits:
-                    if h.X < min_x:
-                        min_x = h.X
-                    if h.X > max_x:
-                        max_x = h.X
-                    if h.Y < min_y:
-                        min_y = h.Y
-                    if h.Y > max_y:
-                        max_y = h.Y
-                    if h.Z < min_z:
-                        min_z = h.Z
-                    if h.Z > max_z:
-                        max_z = h.Z
-                    if np.sqrt(h.X*h.X + h.Y*h.Y) > max_r:
-                        max_r = np.sqrt(h.X*h.X + h.Y*h.Y)
+            min_x = min([h.X for v in t.nodes() for h in v.hits])
+            max_x = max([h.X for v in t.nodes() for h in v.hits])
+            min_y = min([h.Y for v in t.nodes() for h in v.hits])
+            max_y = max([h.Y for v in t.nodes() for h in v.hits])
+            min_z = min([h.Z for v in t.nodes() for h in v.hits])
+            max_z = max([h.Z for v in t.nodes() for h in v.hits])
+            max_r = max([np.sqrt(h.X*h.X + h.Y*h.Y) for v in t.nodes() for h in v.hits])
 
-            z_factor = 1 - 1.8e-04 * (max_z - min_z)
+            z_factor = 1 - 3.4e-04 * (max_z - min_z)
 
             for v in t.nodes():
                 for h in v.hits:
@@ -426,6 +399,8 @@ for n in range(start,start+numb):
             maxZ += [max_z]
             maxR += [max_r]
 
+            time += [times[nevt]]
+
             for v in t.nodes():
                 ## voxel-related
                 event_vxls += [nevt]
@@ -442,7 +417,7 @@ blob_radius = [blob_radius]
 #print(len(numb_of_tracks_before), len(numb_of_tracks))
 df = pd.DataFrame({'event': event,
                    'raw_evt_energy': raw_evt_energy, 'lost_raw_evt_energy': lost_raw_evt_energy,
-                   'evt_energy': evt_energy,  'energy': energy,
+                   'evt_energy': evt_energy,  'energy': energy, 'time': time,
                    'minX': minX, 'maxX': maxX, 'minY': minY, 'maxY': maxY, 'minZ': minZ, 'maxZ': maxZ, 'maxR': maxR,
                    'numb_of_hits': numb_of_hits, 'length': length, 'track_ID': track_ID,
                    'numb_of_tracks': numb_of_tracks,g

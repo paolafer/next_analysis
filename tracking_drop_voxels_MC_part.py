@@ -133,24 +133,28 @@ for n in range(start,start+numb):
         hits_evt = {}
         raw_energy = {}
         bad_event = {}
-        for ee, hc in good_hits.items():
 
+        for ee, hc in good_hits.items():
             bad_evt = False
             hc_corr = []
-            raw_e = 0.
-            for hh in hc.hits:
-                raw_e += hh.E
-                if XYcorrection(hh.X, hh.Y).value == 0:
+
+            hX = [hh.X for hh in hc.hits]
+            hY = [hh.Y for hh in hc.hits]
+            hZ = [hh.Z for hh in hc.hits]
+            hE = [hh.E for hh in hc.hits]
+
+            hEcorr = hE * LTcorrection(hZ, hX, hY).value * XYcorrection(hX, hY).value
+
+            for h, ec in zip(hc.hits, hEcorr):
+                if ec == 0:
                     bad_evt = True
                     break
-                hecorr = hh.E * LTcorrection(hh.Z, hh.X, hh.Y).value * XYcorrection(hh.X, hh.Y).value
-    # here we convert time to space for z. Remember that, so far, drift velocity has been assumed to be 1
-                z = hh.Z * drift_velocity
-                hcorr = Hit(0,Cluster(0, xy(hh.X,hh.Y), xy(0,0), 0), z, hecorr, xy(0,0))
+                hcorr = Hit(0, Cluster(0, xy(h.X,h.Y), xy(0,0), 0), h.Z*drift_velocity, ec, xy(h.Xpeak,h.Ypeak))
                 hc_corr.append(hcorr)
+
             hits_evt[ee] = hc_corr
-            raw_energy[ee] = raw_e
             bad_event[ee] = bad_evt
+            raw_energy[ee] = sum(hE)
 
         p_dict = load_mcparticles(hits_file)
 
@@ -201,14 +205,9 @@ for n in range(start,start+numb):
                                         min_dist = dist
                                         min_hit = hh
                                         min_v = v
-                        ### add voxel energy to hit in general list
-                        for hh in hitc:
-                            if hh == min_hit:
-                                hh.energy += extr1.E
-                        ### add voxel energy to voxel and to voxel hit
-                        for v in voxels:
-                            if v == min_v:
-                                v.energy += extr1.E
+                        ### add voxel energy to hit and voxel, separately
+                        min_hit.energy += extr1.E
+                        min_v.energy   += extr1.E
 
                     if extr2.E < voxel_cut:
 
@@ -234,13 +233,10 @@ for n in range(start,start+numb):
                                         min_dist = dist
                                         min_hit = hh
                                         min_v = v
-                        ### add voxel energy to hit and voxel
-                        for hh in hitc:
-                            if hh == min_hit:
-                                hh.energy += extr2.E
-                        for v in voxels:
-                            if v == min_v:
-                                v.energy += extr2.E
+                        ### add voxel energy to hit and voxel, separately
+                        min_hit.energy += extr2.E
+                        min_v.energy   += extr2.E
+
                 if modified_voxels == 0: break
 
             ### Make tracks with the new voxels
@@ -332,38 +328,13 @@ for n in range(start,start+numb):
                 blob2_bary_y += [bary_pos2[1]]
                 blob2_bary_z += [bary_pos2[2]]
 
-                min_x = 1e+06
-                max_x = -1e+06
-                min_y = 1e+06
-                max_y = -1e+06
-                min_z = 1e+06
-                max_z = 0.
-                max_r = 0
-
-                for v in t.nodes():
-                    ## voxel-related
-                    event_vxls = event_vxls + [nevt]
-                    track_ID_vxls = track_ID_vxls + [c]
-                    voxel_x += [v.X]
-                    voxel_y += [v.Y]
-                    voxel_z += [v.Z]
-                    voxel_e += [v.E]
-
-                    for h in v.hits:
-                        if h.X < min_x:
-                            min_x = h.X
-                        if h.X > max_x:
-                            max_x = h.X
-                        if h.Y < min_y:
-                            min_y = h.Y
-                        if h.Y > max_y:
-                            max_y = h.Y
-                        if h.Z < min_z:
-                            min_z = h.Z
-                        if h.Z > max_z:
-                            max_z = h.Z
-                        if np.sqrt(h.X*h.X + h.Y*h.Y) > max_r:
-                            max_r = np.sqrt(h.X*h.X + h.Y*h.Y)
+                min_x = min([h.X for v in t.nodes() for h in v.hits])
+                max_x = max([h.X for v in t.nodes() for h in v.hits])
+                min_y = min([h.Y for v in t.nodes() for h in v.hits])
+                max_y = max([h.Y for v in t.nodes() for h in v.hits])
+                min_z = min([h.Z for v in t.nodes() for h in v.hits])
+                max_z = max([h.Z for v in t.nodes() for h in v.hits])
+                max_r = max([np.sqrt(h.X*h.X + h.Y*h.Y) for v in t.nodes() for h in v.hits])
 
                 minX += [min_x]
                 maxX += [max_x]
