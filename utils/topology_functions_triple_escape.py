@@ -71,6 +71,6 @@ def find_fractions(x, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbins_pl
     fs = (s1+s2)/(s1+s2+b)
     fb = b/(s1+s2+b)
     err_fs = np.sqrt((b/(s1+s2+b)**2)**2*var_s1 + (b/(s1+s2+b)**2)**2*var_s2 + ((s1+s2)/(s1+s2+b)**2)**2*var_b)
-    err_fb = np.sqrt(((s1+s2)/(s1+s2+b)**2)**2*var_b + (b/(s+b)**2)**2*(var_s1+var_s2))
+    err_fb = np.sqrt(((s1+s2)/(s1+s2+b)**2)**2*var_b + (b/(s1+s2+b)**2)**2*(var_s1+var_s2))
 
     return(tot, fs, fb, err_fs, err_fb)
