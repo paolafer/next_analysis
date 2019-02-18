@@ -56,7 +56,7 @@ def find_fractions(x, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbins_pl
     bin_width = (e_max_plot - e_min_plot) / nbins_plot
 
     s1 = s2 = b = 0.
-    var_s = var_b = 0
+    var_s1 = var_s2 = var_b = 0
     for i in range(low_bin, high_bin+1):
         centre_value = e_min_plot + i * bin_width + bin_width/2
         s1 += gauss(centre_value, fit_result.values[2], fit_result.values[3], fit_result.values[4])
