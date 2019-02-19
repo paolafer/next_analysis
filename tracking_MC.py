@@ -103,7 +103,7 @@ blob2_x, blob2_y, blob2_z = [], [], []
 event_vxls, track_ID_vxls = [], []
 voxel_x, voxel_y, voxel_z = [], [], []
 voxel_e = []
-signal = []
+signal, blob_overlap = [], []
 
 
 hits_file = ''
@@ -213,6 +213,7 @@ for n in range(start,start+numb):
                 extreme2_z += [extr2.Z]
                 eblob1 += [e_blob1/pe2keV]
                 eblob2 += [e_blob2/pe2keV]
+                blob_overlap += [overlap]
 
                 blob1_x += [pos1[0]]
                 blob1_y += [pos1[1]]
@@ -265,7 +266,7 @@ df = pd.DataFrame({'event': event, 'signal': signal,
                    'voxel_size_z': v_size_z,
                    'extreme1_x': extreme1_x, 'extreme1_y': extreme1_y, 'extreme1_z': extreme1_z,
                    'extreme2_x': extreme2_x, 'extreme2_y': extreme2_y, 'extreme2_z': extreme2_z,
-                   'eblob1': eblob1, 'eblob2': eblob2,
+                   'eblob1': eblob1, 'eblob2': eblob2, 'blob_overlap': blob_overlap,
                    'blob1_x': blob1_x, 'blob1_y': blob1_y, 'blob1_z': blob1_z,
                    'blob2_x': blob2_x, 'blob2_y': blob2_y, 'blob2_z': blob2_z,
                    })
