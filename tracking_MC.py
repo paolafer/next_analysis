@@ -237,6 +237,15 @@ for n in range(start,start+numb):
                 maxZ += [max_z]
                 maxR += [max_r]
 
+                for v in t.nodes():
+                    ## voxel-related
+                    event_vxls += [nevt]
+                    track_ID_vxls += [c]
+                    voxel_x += [v.X]
+                    voxel_y += [v.Y]
+                    voxel_z += [v.Z]
+                    voxel_e += [v.E]
+
 
 loop_events = [events_in]
 not_fid_events = [not_fid]
