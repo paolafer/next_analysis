@@ -256,19 +256,18 @@ threshold_SiPMs = [threshold]
 
 df = pd.DataFrame({'event': event, 'signal': signal,
                    'raw_evt_energy': raw_evt_energy, 'lost_raw_evt_energy': lost_raw_evt_energy,
-                   'evt_energy': evt_energy,  'energy': energy,
+                   'evt_energy': evt_energy, 'voxel_size_x': v_size_x, 'voxel_size_y': v_size_y,
+                   'voxel_size_z': v_size_z, 'numb_of_tracks': numb_of_tracks,
+                   'track_ID': track_ID, 'energy': energy,
                    'minX': minX, 'maxX': maxX, 'minY': minY, 'maxY': maxY, 'minZ': minZ, 'maxZ': maxZ,
                    'maxR': maxR,
-                   'numb_of_hits': numb_of_hits, 'length': length, 'track_ID': track_ID,
-                   'numb_of_tracks': numb_of_tracks,
+                   'numb_of_hits': numb_of_hits, 'length': length,
                    'numb_of_voxels': numb_of_voxels,
-                   'voxel_size_x': v_size_x, 'voxel_size_y': v_size_y,
-                   'voxel_size_z': v_size_z,
                    'extreme1_x': extreme1_x, 'extreme1_y': extreme1_y, 'extreme1_z': extreme1_z,
                    'extreme2_x': extreme2_x, 'extreme2_y': extreme2_y, 'extreme2_z': extreme2_z,
                    'eblob1': eblob1, 'eblob2': eblob2, 'blob_overlap': blob_overlap,
                    'blob1_x': blob1_x, 'blob1_y': blob1_y, 'blob1_z': blob1_z,
-                   'blob2_x': blob2_x, 'blob2_y': blob2_y, 'blob2_z': blob2_z,
+                   'blob2_x': blob2_x, 'blob2_y': blob2_y, 'blob2_z': blob2_z
                    })
 df_vxls = pd.DataFrame({'event': event_vxls, 'track_ID': track_ID_vxls,
                         'voxel_x': voxel_x, 'voxel_y': voxel_y, 'voxel_z': voxel_z, 'voxel_e': voxel_e
