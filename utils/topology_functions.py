@@ -103,3 +103,5 @@ def find_fractions_ml_unbinned(fit_result):
 
     err_fs = np.sqrt((b/(s+b)**2)**2*err_s**2 + (s/(s+b)**2)**2*err_b**2 - 2*b*s/(s+b)**4*cov_sb)
     err_fb = np.sqrt((s/(s+b)**2)**2*err_b**2 + (b/(s+b)**2)**2*err_s**2 - 2*b*s/(s+b)**4*cov_sb)
+
+    return (tot, fs, fb, err_fs, err_fb)
