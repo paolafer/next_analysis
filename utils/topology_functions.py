@@ -84,3 +84,22 @@ def find_fractions_2(x, y, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbi
     err_fb = np.sqrt(1/n_tot**2*var_b)
 
     return(n_tot, fs, fb, err_fs, err_fb)
+
+
+### Fractions and errors from Extended Maximum Likelihood unbinned fit
+def find_fractions_ml_unbinned(fit_result):
+
+    signal = 'Ns'
+    background = 'Nb'
+    s = fit_results.values[signal]
+    b = fit_results.values[background]
+    err_s = fit_results.errors[signal]
+    err_b = fit_results.errors[background]
+    cov_sb = fit_results.covariance[signal, background]
+
+    tot = s+b
+    fs = s/(s+b)
+    fb = b/(s+b)
+
+    err_fs = np.sqrt((b/(s+b)**2)**2*err_s**2 + (s/(s+b)**2)**2*err_b**2 - 2*b*s/(s+b)**4*cov_sb)
+    err_fb = np.sqrt((s/(s+b)**2)**2*err_b**2 + (b/(s+b)**2)**2*err_s**2 - 2*b*s/(s+b)**4*cov_sb)
