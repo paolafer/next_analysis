@@ -91,11 +91,11 @@ def find_fractions_ml_unbinned(fit_result):
 
     signal = 'Ns'
     background = 'Nb'
-    s = fit_results.values[signal]
-    b = fit_results.values[background]
-    err_s = fit_results.errors[signal]
-    err_b = fit_results.errors[background]
-    cov_sb = fit_results.covariance[signal, background]
+    s = fit_result.values[signal]
+    b = fit_result.values[background]
+    err_s = fit_result.errors[signal]
+    err_b = fit_result.errors[background]
+    cov_sb = fit_result.covariance[signal, background]
 
     tot = s+b
     fs = s/(s+b)
