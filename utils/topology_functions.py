@@ -5,7 +5,7 @@ Set of functions used in the topology analysis
 import numpy as np
 from scipy import integrate as integrate
 
-from . histo_functions import exp, gauss
+from . histo_functions import exp, gauss, expgauss
 
 ### Partial derivative of gaussian and exponential functions,
 ### with respect to their parameters
