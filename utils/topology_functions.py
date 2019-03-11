@@ -9,7 +9,7 @@ from . histo_functions import exp, gauss
 
 def var_on_signal_events(f, x):
     #g = f.values[2]/(2*np.pi)**.5/f.values[4] * np.exp(-0.5*(x-f.values[3])**2./f.values[4]**2.)
-    ### derivative of gaussian with respect to the three variable: amplitude, mean and sigma
+    ### derivative of gaussian with respect to the three variables: amplitude, mean and sigma
     der_g_amp = 1/(2*np.pi)**.5/f.values[4] * np.exp(-0.5*(x-f.values[3])**2./f.values[4]**2.)
     der_g_mu = f.values[2]/(2*np.pi)**.5 * np.exp(-0.5*(x-f.values[3])**2./f.values[4]**2.) * (x-f.values[3])/f.values[4]**3
     der_g_sigma = f.values[2] * np.exp(-0.5*(x-f.values[3])**2./f.values[4]**2.)*(x-f.values[3])**2/(2*np.pi)**.5/f.values[4]**4 - f.values[2] * np.exp(-0.5*(x-f.values[3])**2./f.values[4]**2.)/(2*np.pi)**.5/f.values[4]**2
@@ -59,7 +59,7 @@ def find_fractions(x, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbins_pl
     return(tot, fs, fb, err_fs, err_fb)
 
 
-def find_fractions_2(x, y, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbins_plot):
+def find_fractions_n_tot_no_error(x, y, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbins_plot):
     low_bin = np.digitize(e_min, x)
     high_bin = np.digitize(e_max, x)
 
@@ -87,6 +87,8 @@ def find_fractions_2(x, y, fit_result, e_min, e_max, e_min_plot, e_max_plot, nbi
 
 
 ### Fractions and errors from Extended Maximum Likelihood unbinned fit
+### with the range of the fit equal to the range in which we want to know
+### the number of events
 def find_fractions_ml_unbinned(fit_result):
 
     signal = 'Ns'
