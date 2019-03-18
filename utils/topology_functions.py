@@ -3,6 +3,7 @@ Set of functions used in the topology analysis
 """
 
 import numpy as np
+import math
 from scipy import integrate as integrate
 
 from . histo_functions import exp, gauss, expgauss
@@ -186,3 +187,50 @@ def find_fractions_ml_unbinned(fit_result):
     err_fb = np.sqrt((s/(s+b)**2)**2*err_b**2 + (b/(s+b)**2)**2*err_s**2 - 2*b*s/(s+b)**4*cov_sb)
 
     return (tot, fs, fb, err_fs, err_fb)
+
+def find_number_of_events_integrals_analytic(f, Nsigma, bin_size):
+    value_bck     = 2*f.values[0]*f.values[1]*math.exp(f.values[3]/f.values[1])*math.sinh(Nsigma*f.values[4]/f.values[1])/bin_size
+    der_a0_bck    = 2*f.values[1]*math.exp(f.values[3]/f.values[1])*math.sinh(Nsigma*f.values[4]/f.values[1])/bin_size
+    der_tau_bck   = -2*f.values[0]*math.exp(f.values[3]/f.values[1])/f.values[1]*(Nsigma*f.values[4]*math.cosh(Nsigma*f.values[4]/f.values[1])+(f.values[3]-f.values[1])*math.sinh(Nsigma*f.values[4]/f.values[1]))
+    der_amp_bck   = 0
+    der_mu_bck    = 2*f.values[0]*math.exp(f.values[3]/f.values[1])*math.sinh(Nsigma*f.values[4]/f.values[1])/bin_size
+    der_sigma_bck = 2*f.values[0]*math.exp(f.values[3]/f.values[1])*Nsigma*math.cosh(Nsigma*f.values[4]/f.values[1])/bin_size
+    var_bck = der_a0_bck**2* f.cov[0,0]\
+              + der_tau_bck**2*f.cov[1,1]\
+              + der_amp_bck**2*f.cov[2,2]\
+              + der_mu_bck**2*f.cov[3,3]\
+              + der_sigma_bck**2+f.cov[4,4]\
+              + der_a0_bck*der_tau_bck*f.cov[0,1]\
+              + der_a0_bck*der_amp_bck*f.cov[0,2]\
+              + der_a0_bck*der_mu_bck*f.cov[0,3]\
+              + der_a0_bck*der_sigma_bck*f.cov[0,4]\
+              + der_tau_bck*der_amp_bck*f.cov[1,2]\
+              + der_tau_bck*der_mu_bck*f.cov[1,3]\
+              + der_tau_bck*der_sigma_bck*f.cov[1,4]\
+              + der_amp_bck*der_mu_bck*f.cov[2,3]\
+              + der_amp_bck*der_sigma_bck*f.cov[2,4]\
+              + der_mu_bck*der_sigma_bck*f.cov[3,4]
+
+    value_sig = f.values[2]*math.erf(Nsigma/math.sqrt(2))/bin_size
+    der_a0_sig    = 0
+    der_tau_sig   = 0
+    der_amp_sig   = math.erf(Nsigma/math.sqrt(2))/bin_size
+    der_mu_sig    = 0
+    der_sigma_sig = 0
+    var_sig = der_a0_sig**2* f.cov[0,0]\
+              + der_tau_sig**2*f.cov[1,1]\
+              + der_amp_sig**2*f.cov[2,2]\
+              + der_mu_sig**2*f.cov[3,3]\
+              + der_sigma_sig**2+f.cov[4,4]\
+              + der_a0_sig*der_tau_sig*f.cov[0,1]\
+              + der_a0_sig*der_amp_sig*f.cov[0,2]\
+              + der_a0_sig*der_mu_sig*f.cov[0,3]\
+              + der_a0_sig*der_sigma_sig*f.cov[0,4]\
+              + der_tau_sig*der_amp_sig*f.cov[1,2]\
+              + der_tau_sig*der_mu_sig*f.cov[1,3]\
+              + der_tau_sig*der_sigma_sig*f.cov[1,4]\
+              + der_amp_sig*der_mu_sig*f.cov[2,3]\
+              + der_amp_sig*der_sigma_sig*f.cov[2,4]\
+              + der_mu_sig*der_sigma_sig*f.cov[3,4]
+
+    return value_sig+value_bck, value_sig, value_bck, np.sqrt(var_sig), np.sqrt(var_bck)
