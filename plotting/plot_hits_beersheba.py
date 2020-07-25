@@ -1,33 +1,34 @@
 import os
 import sys
-import random
-import tables as tb
 import numpy  as np
+import tables as tb
 import pandas as pd
 
 import matplotlib
 matplotlib.use('TkAgg')
-
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 """
-This script plots the true MC hits of a nexus event.
+This scripts plots the hits reconstructed with Beersheba.
 """
 
-file_name = sys.argv[1]
+cmap = plt.cm.get_cmap('viridis')
+#plt.rcParams.update({'font.size': 14})
+
+the_file = sys.argv[1]
 evt_number = int(sys.argv[2])
 
-hits = pd.read_hdf(file_name, 'MC/hits')
+with tb.open_file(the_file) as h5in:
+    table = getattr(getattr(h5in.root, 'DECO'), 'Events').read()
+    hits_df = pd.DataFrame.from_records(table)
+    this_evt_df = hits_df[hits_df.event == evt_number]
+    the_hits = []
 
-evt_hits = hits[hits.event_id == evt_number]
-evt_hits = evt_hits[evt_hits.label == 'ACTIVE']
-
-x = evt_hits.x
-y = evt_hits.y
-z = evt_hits.z
-e = evt_hits.energy*1000
-
+    x = this_evt_df.X
+    y = this_evt_df.Y
+    z = this_evt_df.Z
+    e = this_evt_df.E*1000
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
@@ -35,9 +36,9 @@ ax.set_xlabel('x (mm)')
 ax.set_ylabel('y (mm)')
 ax.set_zlabel('z (mm)')
 
-x_range = (x.max()-x.min()) * 0.5
-y_range = (y.max()-y.min()) * 0.5
-z_range = (z.max()-z.min()) * 0.5
+x_range = (x.max()-x.min())/2.
+y_range = (y.max()-y.min())/2.
+z_range = (z.max()-z.min())/2.
 mid_x = (x.max()+x.min()) * 0.5
 mid_y = (y.max()+y.min()) * 0.5
 mid_z = (z.max()+z.min()) * 0.5
