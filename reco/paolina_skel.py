@@ -167,7 +167,7 @@ def get_skel_extremes(vox_size         ,
         #change dtype of columns to match type of variables
         df = df.apply(lambda x : x.astype(types_dict[x.name]))
 
-        return df
+    return df
 
 
 
