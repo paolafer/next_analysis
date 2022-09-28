@@ -83,6 +83,27 @@ def gtext_2gaus(values, errors, chi2, un='ps'):
              2.35*values[5], 2.35*errors[5], un,
              chi2))
 
+def gtext_2gaus_res(values, errors, chi2, un='ps'):
+    """
+    Build a string to be displayed within a matplotlib plot.
+    Show two gaussians.
+    """
+    return textwrap.dedent("""
+        $\mu_1$ = {:.2f} $\pm$ {:.2f} {:}
+        FWHM$_1$ = {:.2f} $\pm$ {:.2f} {:}
+        res$_1$ = {:.2f} $\pm$ {:.2f}
+        $\mu_2$ = {:.2f} $\pm$ {:.2f} {:}
+        FWHM$_2$ = {:.2f} $\pm$ {:.2f} {:}
+        res$_2$ = {:.2f} $\pm$ {:.2f}
+        $\chi^2$/N$_\mathrm{{dof}}$  = {:.2f}
+        """.format(values[1], errors[1], un,
+             2.35*values[2], 2.35*errors[2], un,
+             2.35*values[2]/values[1], 100*np.sqrt((errors[2]/values[1])**2+values[2]/values[1]**2*errors[1]**2),
+             values[4], errors[4], un,
+             2.35*values[5], 2.35*errors[5], un,
+             2.35*values[5]/values[4], 100*np.sqrt((errors[5]/values[4])**2+values[5]/values[4]**2*errors[4]**2),
+             chi2))
+
 def gtext_2gaus_angle(values, errors, chi2, min_r, max_r):
     """
     Build a string to be displayed within a matplotlib plot.
