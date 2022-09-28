@@ -21,6 +21,9 @@ def expgauss(x, a0, tau, amp, mu, sigma):
 def exp2gauss(x, a0, tau, amp, mu, sigma, amp1, mu1, sigma1):
     return a0 * np.exp(x/tau) + amp/(2*np.pi)**.5/sigma * np.exp(-0.5*(x-mu)**2./sigma**2.) + amp1/(2*np.pi)**.5/sigma1 * np.exp(-0.5*(x-mu1)**2./sigma1**2.)
 
+def polygauss(x, a0, a1, a2, amp, mu, sigma):
+    return a0 + x*a1 + x*x*a2 + amp/(2*np.pi)**.5/sigma * np.exp(-0.5*(x-mu)**2./sigma**2.)
+
 def gtext_res(values, errors, chi2, un='pe'):
     """
     Build a string to be displayed within a matplotlib plot.
@@ -62,6 +65,43 @@ def gtext_angle(values, errors, chi2, min_r, max_r):
         $\chi^2$/N$_\mathrm{{dof}}$  = {:.2f}
         """.format(values[0], errors[0],
              2.35*values[1], 2.35*errors[1], 2.35*values[1]/180*np.pi*min_r, 2.35*values[1]/180*np.pi*max_r, chi2))
+
+def gtext_2gaus(values, errors, chi2, un='ps'):
+    """
+    Build a string to be displayed within a matplotlib plot.
+    Show two gaussians.
+    """
+    return textwrap.dedent("""
+        $\mu_1$ = {:.2f} $\pm$ {:.2f} {:}
+        FWHM$_1$ = {:.2f} $\pm$ {:.2f} {:}
+        $\mu_2$ = {:.2f} $\pm$ {:.2f} {:}
+        FWHM$_2$ = {:.2f} $\pm$ {:.2f} {:}
+        $\chi^2$/N$_\mathrm{{dof}}$  = {:.2f}
+        """.format(values[1], errors[1], un,
+             2.35*values[2], 2.35*errors[2], un,
+             values[4], errors[4], un,
+             2.35*values[5], 2.35*errors[5], un,
+             chi2))
+
+def gtext_2gaus_angle(values, errors, chi2, min_r, max_r):
+    """
+    Build a string to be displayed within a matplotlib plot.
+    """
+    return textwrap.dedent("""
+        $\mu_1$ = {:.2f} $\pm$ {:.2f} deg
+        FWHM$_1$ = {:.2f} $\pm$ {:.2f} deg
+        $\mu_2$ = {:.2f} $\pm$ {:.2f} deg
+        FWHM$_2$ = {:.2f} $\pm$ {:.2f} deg
+        FWHM$_1$ (arc) = {:.2f}-{:.2f} mm
+        FWHM$_2$ (arc) = {:.2f}-{:.2f} mm
+        $\chi^2$/N$_\mathrm{{dof}}$  = {:.2f}
+        """.format(values[1], errors[1],
+             2.35*values[2], 2.35*errors[2],
+             values[4], errors[4],
+             2.35*values[5], 2.35*errors[5],
+             2.35*values[2]/180*np.pi*min_r, 2.35*values[2]/180*np.pi*max_r,
+             2.35*values[5]/180*np.pi*min_r, 2.35*values[5]/180*np.pi*max_r,
+             chi2))
 
 ## style
 # These are the "Tableau 20" colors as RGB.
